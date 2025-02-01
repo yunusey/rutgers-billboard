@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useUser, UserProfile } from "@auth0/nextjs-auth0/client";
 import { Alegreya } from "next/font/google";
@@ -28,43 +29,26 @@ export default function Home() {
 	return (
 		<div className="items-center justify-center">
 			<NavBar user={user} />
-			<div className="header text-center">
-				<div className="text-5xl">
-					Rutgers Billboard
-				</div>
-				<div className={`text-2xl ${alegreya_italic.className}`}>
-					Finding the best sections for your classes made easy...
-				</div>
-			</div>
-
-			<div className="flex mt-10 items-center justify-center gap-4">
-				<Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href="api/auth/login">
-					Login
-				</Link>
-				<Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href="api/auth/signup">
-					Sign Up
-				</Link>
-				<Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href="api/auth/logout">
-					Logout
-				</Link>
-			</div>
+			<Dashboard />
 		</div>
 	);
 }
 
 function NavBar({ user }: { user: UserProfile | undefined }) {
 	return (
-		<Navbar fluid className="bg-[#1e1e2e] border-b-4 border-[#89b4fa]">
-			<Navbar.Brand as={Link} href="/" className={`${alegreya.className} text-2xl text-[#89b4fa]`}>
-				Rutgers Billboard
-			</Navbar.Brand>
-			<div className="float-right">
+		<Navbar fluid className="w-full items-center justify-center bg-[#1e1e2e] border-b-4 border-[#89b4fa]">
+			<div className="float-left w-fit">
+				<Navbar.Brand as={Link} href="/" className={`${alegreya.className} text-2xl text-[#89b4fa]`}>
+					Rutgers Billboard
+				</Navbar.Brand>
+			</div>
+			<div className="float-right w-fit">
 				{user && (
 					<Dropdown
 						arrowIcon={false}
 						inline
 						label={
-							<Avatar img={user.picture} rounded />
+							<Avatar className="h-10 w-10" img={user?.picture ? user.picture : ""} rounded />
 						}
 						className="bg-[#1e1e2e] border-r-8 border-2 border-[#89b4fa]"
 					>
@@ -81,5 +65,51 @@ function NavBar({ user }: { user: UserProfile | undefined }) {
 				)}
 			</div>
 		</Navbar>
+	);
+}
+
+type SectionRequest = {
+	//_id: ObjectId
+	class: String
+	section: {
+		current: String
+		wants: String
+	}
+	time: String
+}
+
+const Dashboard = () => {
+	const [classes, setClasses] = useState<SectionRequest[]>([])
+	useEffect(() => {
+		fetch("/api/db")
+			.then((res) => res.json())
+			.then((data) => setClasses(data))
+	}, [])
+	return (
+		<div className="flex w-full m-4 items-center justify-center">
+			<table className="w-3/4 border-collapse border border-[#89b4fa] shadow-lg">
+				<thead className="bg-[#fab387] text-[#1e1e2e]">
+					<tr>
+						<th className="border p-2">Class</th>
+						<th className="border p-2">Has</th>
+						<th className="border p-2">Wants</th>
+						<th className="border p-2">Time</th>
+					</tr>
+				</thead>
+				<tbody>
+					{classes.map((classItem: any) => {
+						const time = new Date(classItem.time * 1000).toLocaleString();
+						return (
+							<tr key={classItem._id} className="even:bg-gray-100 hover:bg-gray-200 transition">
+								<td className="border p-2">{classItem.class}</td>
+								<td className="border p-2">{classItem.section.current}</td>
+								<td className="border p-2">{classItem.section.wants.join(';')}</td>
+								<td className="border p-2">{time}</td>
+							</tr>
+						)
+					})}
+				</tbody>
+			</table>
+		</div>
 	);
 }
