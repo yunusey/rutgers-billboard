@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { Alegreya } from "next/font/google";
@@ -15,9 +16,11 @@ export default function Home() {
 	const { isLoading, user } = useUser();
 	const router = useRouter();
 
-	if (!isLoading && user) {
-		router.push("/dashboard");
-	}
+	useEffect(() => {
+		if (!isLoading && user) {
+			router.push("/dashboard");
+		}
+	}, [user, isLoading]);
 
 	return (
 		<div className="items-center justify-center">
