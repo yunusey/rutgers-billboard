@@ -92,7 +92,7 @@ function NavBar({ user, isLoading }: { user: UserProfile | undefined, isLoading:
 	return (
 		<Navbar className={`border-b-4 border-secondary bg-background w-full`}>
 			<NavbarBrand>
-				<Button variant="light" className="font-medium text-2xl" href="/">Rutgers Billboard</Button>
+				<Button variant="light" className="font-medium text-2xl text-foreground" href="/">Rutgers Billboard</Button>
 			</NavbarBrand>
 			<NavbarContent className="hidden sm:flex gap-4" justify="center" />
 			{user &&
@@ -124,7 +124,7 @@ function NavBar({ user, isLoading }: { user: UserProfile | undefined, isLoading:
 				<NavbarContent as="button" className="text-2xl hidden sm:flex gap-4" justify="end">
 					<Dropdown placement="bottom-end">
 						<DropdownTrigger>
-							<div>
+							<div className="font-medium bg-primary rounded-md p-2 text-background">
 								Join Us!
 							</div>
 						</DropdownTrigger>
