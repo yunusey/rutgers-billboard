@@ -45,7 +45,7 @@ export default function Home() {
 	}, [chosenClass])
 
 	return (
-		<div className="">
+		<div className="w-full">
 			<NavBar user={user} isLoading={isLoading} />
 			<div className={`grid grid-cols-3 ${jetbrains.className}`}>
 				<Autocomplete className="w-full h-full p-4" variant="bordered" label="Select a class" defaultItems={classInfo} onSelectionChange={(key) => setChosenClass(key as string)} isVirtualized={false}>
@@ -90,15 +90,16 @@ export default function Home() {
 
 function NavBar({ user, isLoading }: { user: UserProfile | undefined, isLoading: boolean }) {
 	return (
-		<Navbar className={`border-b-4 border-secondary bg-background ${jetbrains.className}`}>
+		<Navbar className={`border-b-4 border-secondary bg-background w-full`}>
 			<NavbarBrand>
-				<Button variant="light" className="font-bold text-inherit text-2xl" href="/">Rutgers Billboard</Button>
+				<Button variant="light" className="font-medium text-2xl" href="/">Rutgers Billboard</Button>
 			</NavbarBrand>
+			<NavbarContent className="hidden sm:flex gap-4" justify="center" />
 			{user &&
-				<NavbarContent as="div" className="hidden sm:flex gap-4" justify="end">
+				<NavbarContent className="hidden sm:flex gap-4 text-" justify="end">
 					<Dropdown placement="bottom-end">
 						<DropdownTrigger>
-							<Button variant="light" className="flex items-center gap-2">
+							<Button variant="light" className="flex gap-2">
 								<div className="font-medium">
 									{user?.nickname ?? user?.name ?? ""}
 								</div>
@@ -112,7 +113,7 @@ function NavBar({ user, isLoading }: { user: UserProfile | undefined, isLoading:
 								/>
 							</Button>
 						</DropdownTrigger>
-						<DropdownMenu aria-label="Profile Actions" className={jetbrains.className}>
+						<DropdownMenu aria-label="Profile Actions">
 							<DropdownItem key="profile">Profile</DropdownItem>
 							<DropdownItem key="logout" color="danger" href="/api/auth/logout">Log Out</DropdownItem>
 						</DropdownMenu>
@@ -167,6 +168,7 @@ const Dashboard = ({ section }: { section: string }) => {
 			<TableBody emptyContent="No classes found">
 				{sections.map((sectionItem: any) => {
 					const id = sectionItem._id
+					const email = sectionItem.email
 					const time = new Date(parseInt(sectionItem.time)).toLocaleString();
 					const sectionIndex = sectionItem.section.current
 					const wants = sectionItem.section.wants
@@ -184,7 +186,7 @@ const Dashboard = ({ section }: { section: string }) => {
 								<Chip key={item} variant="flat" className="m-1 text-background bg-primary">{`#${item}`}</Chip>)}</TableCell>
 							<TableCell>{time}</TableCell>
 							<TableCell>
-								<Button as={Link} href={`/contact?id=${id}`} color="primary">
+								<Button as={Link} href={`mailto:${email}`} color="primary">
 									Contact
 								</Button>
 							</TableCell>

@@ -51,6 +51,7 @@ export async function GET(request: Request) {
                 if (!classInfo) return
                 return {
                     _id: classItem._id,
+                    email: classItem.email,
                     section: classItem.section,
                     time: classItem.time,
                     courseString: sectionInfo?.courseString,
