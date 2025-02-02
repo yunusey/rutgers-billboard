@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Alegreya } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Providers } from "./providers";
 import "./globals.css";
 
-const alegreya = Alegreya({
-	variable: "--font-alegreya",
+const jetbrains = JetBrains_Mono({
+	variable: "--font-jetbrains",
 	subsets: ["latin"],
 });
 
@@ -21,10 +22,12 @@ export default async function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${alegreya.className} antialiased`}
+				className={`${jetbrains.className} antialiased`}
 			>
 				<UserProvider>
-					{children}
+					<Providers>
+						{children}
+					</Providers>
 				</UserProvider>
 			</body>
 		</html>

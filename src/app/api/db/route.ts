@@ -1,14 +1,13 @@
 import { MongoClient, ObjectId } from 'mongodb'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest } from 'next/server'
 
 type SectionRequest = {
     _id: ObjectId
-    class: String
     section: {
-        current: String
-        wants: String
+        current: string
+        wants: string[]
     }
-    time: String
+    time: string
 }
 
 function getDatabase() {
@@ -24,44 +23,71 @@ export async function GET(request: Request) {
         filter['class'] = body.get('class')
     }
     if (body.get('section')) {
-        filter['section.current'] = body.get('section')
+        console.log(body.get('section'))
+        filter['section.current'] = {
+            $regex: `^${body.get('section')}`,
+            $options: 'i',
+        }
     }
-    //console.log(filter)
 
     try {
         const db = getDatabase()
-        const classes: SectionRequest[] = (await db
-            .collection('classes')
-            .find(filter)
-            .sort({ time: 1 })
-            .limit(10)
-            .toArray())!.map((classItem) => {
-            return {
-                _id: classItem._id,
-                class: classItem.class,
-                section: classItem.section,
-                time: classItem.time,
-            }
-        })
-        return Response.json(classes)
+        const sectionInfoCollection = db.collection('section-info')
+        const classInfoCollection = db.collection('class-info')
+        const requests: SectionRequest[] = await Promise.all(
+            (await db
+                .collection('classes')
+                .find(filter)
+                .sort({ time: 1 })
+                .limit(10)
+                .toArray())!.map(
+                async (classItem: {
+                    _id: ObjectId
+                    email: string
+                    section: {
+                        current: string
+                        wants: string[]
+                    }
+                    time: string
+                }) => {
+                    const sectionInfo = await sectionInfoCollection.findOne({
+                        _id: classItem.section.current,
+                    })
+                    if (!sectionInfo) return
+                    const classInfo = await classInfoCollection.findOne({
+                        _id: sectionInfo.courseString,
+                    })
+                    if (!classInfo) return
+                    return {
+                        _id: classItem._id,
+                        section: classItem.section,
+                        time: classItem.time,
+                        courseString: sectionInfo?.courseString,
+                        courseName: classInfo?.name,
+                    }
+                }
+            )
+        )
+        return Response.json(requests)
     } catch (e) {
         console.error(e)
     }
 }
 
-export async function POST(request: Request) {
+/// Currently, this function doesn't work very nicely - we don't check if the email
+/// is in our database as anyone can create a request and it can cause a lot of problems
+/// for us. However, the users that are using the app directly on Web are already
+/// authenticated, with Auth0.
+export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
-        class: String
+        email: string
+        time: string
         section: {
-            current: String
-            wants: String
+            current: string
+            wants: string[]
         }
     }
     const db = getDatabase()
-    const result = await db.collection('classes').insertOne({
-        class: body.class,
-        section: body.section,
-        time: Date.now(),
-    })
+    const result = await db.collection('classes').insertOne(body)
     return Response.json(result)
 }
