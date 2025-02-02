@@ -59,14 +59,19 @@ async function getSectionData(
 }
 
 async function getClassData(
-    rawData: { courseString: string; expandedTitle: string }[]
+    rawData: { courseString: string; expandedTitle: string; title: string }[]
 ): Promise<ClassInfo[]> {
     const filtered = rawData.map(
-        (item: { courseString: string; expandedTitle: string }) => {
+        (item: {
+            courseString: string
+            expandedTitle: string
+            title: string
+        }) => {
             console.log(item.expandedTitle)
             return {
                 _id: item.courseString.trim(),
-                name: item.expandedTitle.trim(),
+                // `expandedTitle` property is not always valid
+                name: item.expandedTitle.trim() || item.title.trim(),
             }
         }
     )
