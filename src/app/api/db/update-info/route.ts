@@ -92,7 +92,10 @@ export async function GET(request: Request) {
             collection === 'class'
                 ? await getClassData(rawData)
                 : await getSectionData(rawData)
-        const result = await db.collection(collectionName).insertMany(data)
+
+        // FIXME: This is a hack
+        // @ts-ignore
+        const result = await db.collection(collectionName).insertMany(data, {})
         return Response.json(result)
     } catch (e) {
         return Response.json(e)
